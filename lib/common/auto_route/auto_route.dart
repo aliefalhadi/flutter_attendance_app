@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 
+import 'auto_route.gr.dart';
+
 @AutoRouterConfig(
   replaceInRouteName: 'Page,Route',
 )
