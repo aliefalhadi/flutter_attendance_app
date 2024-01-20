@@ -19,7 +19,12 @@ class App extends StatelessWidget {
           title: 'Attendance App',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
+            useMaterial3: false,
+            fontFamily: "Inter",
+            appBarTheme: const AppBarTheme(
+              elevation: 0,
+              centerTitle: false,
+            ),
           ),
           builder: (context, widget) {
             return MediaQuery(
