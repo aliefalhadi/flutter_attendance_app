@@ -31,6 +31,7 @@ dependencies:
   geocoding: ^2.1.1
   camera: ^0.10.5+9
   flutter_screenutil: ^5.9.0
+  formz: ^0.6.1
 
 dev_dependencies:
   flutter_test:
@@ -47,9 +48,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/svg_icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -19,7 +19,7 @@ class AppConfig {
     // await CrashlyticsLogger.init();
 
     _instance = AppConfig._internal(
-      apiBaseUrl: "asdasd",
+      apiBaseUrl: "https://dev-api.fortiusys.com/api",
     );
   }
 
