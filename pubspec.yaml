@@ -26,12 +26,15 @@ dependencies:
   auto_route: ^7.8.4
   flutter_svg: ^2.0.9
   shimmer: ^3.0.0
-  permission_handler: ^11.2.0
+  permission_handler:
   geolocator: ^10.1.0
   geocoding: ^2.1.1
   camera: ^0.10.5+9
   flutter_screenutil: ^5.9.0
   formz: ^0.6.1
+  intl:
+  flutter_osm_plugin: 0.53.4+1
+  flutter_osm_interface: 0.3.5
 
 dev_dependencies:
   flutter_test:
