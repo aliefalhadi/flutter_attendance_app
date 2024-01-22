@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:attendance_app/common/auto_route/auto_route.gr.dart';
 import 'package:attendance_app/common/extentions/date_format.dart';
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -56,7 +57,11 @@ class _LocationSubmitAttendancePageState
           width: 1.sw,
           child: ElevatedButton(
             child: const Text("Ambil Foto"),
-            onPressed: () {},
+            onPressed: () {
+              AutoRouter.of(context).push(
+                AttendanceSubmitPhotoRoute(isClockIn: true),
+              );
+            },
           ),
         ),
       ),
