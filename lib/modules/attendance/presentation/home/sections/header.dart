@@ -25,7 +25,7 @@ class _Header extends StatelessWidget {
           ),
           SizedBox(height: 4.h),
           Text(
-            "08:00 - 13:00",
+            "08:00 - 17:00",
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           SizedBox(height: 8.h),

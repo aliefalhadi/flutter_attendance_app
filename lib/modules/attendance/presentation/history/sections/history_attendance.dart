@@ -1,4 +1,4 @@
-part of '../home_page.dart';
+part of '../history_attendance_page.dart';
 
 class _HistoryAttendance extends StatelessWidget {
   const _HistoryAttendance();
@@ -14,25 +14,20 @@ class _HistoryAttendance extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "REKAP ABSEN",
+                "DAFTAR ABSENSI",
                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
               ),
-              TextButton(
-                  onPressed: () {
-                    AutoRouter.of(context).push(const HistoryAttendanceRoute());
-                  },
-                  child: const Text("Lihat Semua"))
             ],
           ),
           const Divider(),
-          BlocBuilder<AttendanceHomeBloc, AttendanceHomeState>(
+          BlocBuilder<HistoryAttendanceBloc, HistoryAttendanceState>(
             builder: (context, state) {
-              if (state.status == AttendanceHomeStatus.loaded &&
+              if (state.status == HistoryAttendanceStatus.loaded &&
                   state.listAttendance.isNotEmpty) {
                 return _ListHistoryAttendance(state.listAttendance);
-              } else if (state.status == AttendanceHomeStatus.loaded) {
+              } else if (state.status == HistoryAttendanceStatus.loaded) {
                 return const _EmptyAttendance();
               } else {
                 return Column(
@@ -63,14 +58,14 @@ class _EmptyAttendance extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            "Tidak ada rekap absen",
+            "Tidak ada riwayat absen",
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           SizedBox(
             height: 8.h,
           ),
           const Text(
-            "Rekap absen Anda akan tampil disini ketika Anda sudah melakukan absen",
+            "Belum ada absensi untuk saat ini, seluruh absensi dapat dilihat di halaman ini",
             textAlign: TextAlign.center,
           ),
         ],
