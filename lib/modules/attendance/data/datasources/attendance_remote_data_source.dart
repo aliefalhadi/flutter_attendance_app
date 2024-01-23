@@ -9,9 +9,14 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart' as osm;
 import 'package:injectable/injectable.dart';
 
 import '../../../../common/constants/api_path_constant.dart';
+import '../../domain/entities/attendance_entity.codegen.dart';
+import '../../domain/entities/list_attendance_params.codegen.dart';
 import '../models/geo_coding_response_model.codegen.dart';
 
 abstract class AttendanceRemoteDataSource {
+  Future<List<AttendanceEntity>> getListAttendance(
+    ListAttendanceParams attendanceParams,
+  );
   Future<GeoCodingResponseModel> convertCoordinateToAddress(
     osm.GeoPoint latLng,
   );
@@ -61,11 +66,33 @@ class AttendanceRemoteDataSourceImpl extends AttendanceRemoteDataSource {
 
     await referenceImageToUpload.putFile(File(imagePath));
 
-    // We have successfully upload the image now
-    // make this upload image link in firebase database
-
     String urlImage = await referenceImageToUpload.getDownloadURL();
 
     return urlImage;
+  }
+
+  @override
+  Future<List<AttendanceEntity>> getListAttendance(
+      ListAttendanceParams attendanceParams) async {
+    final startDateTime =
+        DateTime.parse("${attendanceParams.startDate} 00:00:00")
+            .millisecondsSinceEpoch;
+    final endDateTime = DateTime.parse("${attendanceParams.endDate} 23:59:59")
+        .millisecondsSinceEpoch;
+
+    final snapshots = await _firestore
+        .collection('attendances')
+        .where('attendance_time',
+            isGreaterThanOrEqualTo: startDateTime,
+            isLessThanOrEqualTo: endDateTime)
+        .get();
+
+    List<AttendanceEntity> listTemp = [];
+    for (var element in snapshots.docs) {
+      final dt = element.data();
+      listTemp.add(AttendanceEntity.fromJson(dt));
+    }
+
+    return listTemp;
   }
 }

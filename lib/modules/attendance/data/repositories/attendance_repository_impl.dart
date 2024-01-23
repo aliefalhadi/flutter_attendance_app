@@ -1,10 +1,12 @@
 import 'package:attendance_app/modules/attendance/data/models/geo_coding_response_model.codegen.dart';
+import 'package:attendance_app/modules/attendance/domain/entities/list_attendance_params.codegen.dart';
 import 'package:attendance_app/modules/attendance/domain/entities/post_attendance_params.codegen.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../common/constants/app_error.dart';
+import '../../domain/entities/attendance_entity.codegen.dart';
 import '../../domain/entities/place_search_entity.codegen.dart';
 import '../../domain/repositories/attendance_repository.dart';
 import '../datasources/attendance_remote_data_source.dart';
@@ -52,12 +54,22 @@ class AttendanceRepositoryImpl extends AttendanceRepository {
 
       return Right(res);
     } on Exception catch (e, _) {
-      print("asdasddas");
-      print(e);
       return Left(AppError('Error $e'));
     } catch (e, _) {
-      print("asdasddas");
-      print(e);
+      return Left(AppError('Error $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppError, List<AttendanceEntity>>> getListAttendance(
+      ListAttendanceParams attendanceParams) async {
+    try {
+      final res = await _remoteDataSource.getListAttendance(attendanceParams);
+
+      return Right(res);
+    } on Exception catch (e, _) {
+      return Left(AppError('Error $e'));
+    } catch (e, _) {
       return Left(AppError('Error $e'));
     }
   }

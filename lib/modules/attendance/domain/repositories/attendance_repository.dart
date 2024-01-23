@@ -3,6 +3,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
 import '../../../../common/constants/app_error.dart';
+import '../entities/attendance_entity.codegen.dart';
+import '../entities/list_attendance_params.codegen.dart';
 import '../entities/place_search_entity.codegen.dart';
 
 abstract class AttendanceRepository {
@@ -13,4 +15,7 @@ abstract class AttendanceRepository {
     SubmitAttendanceParams params,
   );
   Future<Either<AppError, String>> uploadImage(String imagePath);
+  Future<Either<AppError, List<AttendanceEntity>>> getListAttendance(
+    ListAttendanceParams attendanceParams,
+  );
 }

@@ -114,7 +114,7 @@ class _LocationSubmitAttendancePageState
                           ? () {
                               AutoRouter.of(context).push(
                                 AttendanceSubmitPhotoRoute(
-                                  isClockIn: true,
+                                  isClockIn: widget.isClockIn,
                                   latLngLocation:
                                       _locationBloc.state.coordinateLocation!,
                                   placeAddressName: _locationBloc
