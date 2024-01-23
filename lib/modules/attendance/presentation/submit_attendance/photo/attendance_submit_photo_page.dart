@@ -17,13 +17,13 @@ import 'sections/preview_photo.dart';
 class AttendanceSubmitPhotoPage extends StatefulWidget {
   const AttendanceSubmitPhotoPage({
     Key? key,
-    this.latLngLocation,
-    this.placeAddressName,
+    required this.latLngLocation,
+    required this.placeAddressName,
     required this.isClockIn,
   }) : super(key: key);
 
-  final GeoPoint? latLngLocation;
-  final String? placeAddressName;
+  final GeoPoint latLngLocation;
+  final String placeAddressName;
   final bool isClockIn;
 
   @override
@@ -191,7 +191,7 @@ class _AttendanceSubmitPhotoPageState extends State<AttendanceSubmitPhotoPage>
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.camera),
+                icon: const Icon(Icons.camera_alt),
                 onPressed: () {
                   initCamera(_cameraController!.description.lensDirection ==
                           CameraLensDirection.front
@@ -271,6 +271,7 @@ class PreviewPhotoContent extends StatelessWidget {
                           ),
                           child: const Text(
                             "Posisikan wajah Anda di dalam lingkaran",
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ),

@@ -2,11 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:attendance_app/common/auto_route/auto_route.gr.dart';
+import 'package:attendance_app/common/di_module/init_config.dart';
 import 'package:attendance_app/common/extentions/date_format.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
+
+import '../../../../../common/widgets/skeleton.dart';
+import 'bloc/attendance_submit_location_bloc.dart';
 
 @RoutePage()
 class LocationSubmitAttendancePage extends StatefulWidget {
@@ -26,14 +33,26 @@ class _LocationSubmitAttendancePageState
     extends State<LocationSubmitAttendancePage> {
   late DateTime dateTimeNow;
   MapController? mapController;
+  LocationPermission? permission;
+  late AttendanceSubmitLocationBloc _locationBloc;
 
   @override
   void initState() {
     super.initState();
+    _locationBloc = getIt<AttendanceSubmitLocationBloc>();
+
     mapController = MapController(
       initMapWithUserPosition: true,
     );
     dateTimeNow = DateTime.now();
+
+    _determinePosition().then((value) async {
+      if (value) {
+        _locationBloc.add(
+          const AttendanceSubmitLocationEvent.getLocation(),
+        );
+      }
+    });
   }
 
   @override
@@ -43,44 +62,90 @@ class _LocationSubmitAttendancePageState
     super.dispose();
   }
 
+  Future<bool> _determinePosition() async {
+    Location location = Location();
+    bool serviceGpsEnabled = await location.serviceEnabled();
+    if (!serviceGpsEnabled) {
+      serviceGpsEnabled = await location.requestService();
+      if (!serviceGpsEnabled) {
+        Navigator.pop(context);
+
+        return false;
+      }
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (isLocationDenied()) {
+      permission = await Geolocator.requestPermission();
+      if (isLocationDenied()) {
+        Navigator.pop(context);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool isLocationDenied() {
+    return permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${widget.isClockIn ? "Absen Masuk" : "Absen Keluar"} • Geolokasi',
-        ),
-      ),
-      bottomSheet: Container(
-        padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
-        child: SizedBox(
-          width: 1.sw,
-          child: ElevatedButton(
-            child: const Text("Ambil Foto"),
-            onPressed: () {
-              AutoRouter.of(context).push(
-                AttendanceSubmitPhotoRoute(isClockIn: true),
-              );
-            },
+    return BlocProvider(
+      create: (context) => _locationBloc,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            '${widget.isClockIn ? "Absen Masuk" : "Absen Keluar"} • Geolokasi',
           ),
         ),
-      ),
-      body: Container(
-        padding: EdgeInsets.all(16.r),
-        child: Column(
-          children: [
-            BuildDateTimeHeader(
-              dateTimeNow: dateTimeNow,
+        bottomSheet: Container(
+          padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
+          child: SizedBox(
+            width: 1.sw,
+            child: BlocBuilder<AttendanceSubmitLocationBloc,
+                AttendanceSubmitLocationState>(
+              builder: (context, state) {
+                return ElevatedButton(
+                  onPressed:
+                      state.status == AttendanceSubmitLocationStatus.loaded
+                          ? () {
+                              AutoRouter.of(context).push(
+                                AttendanceSubmitPhotoRoute(
+                                  isClockIn: true,
+                                  latLngLocation:
+                                      _locationBloc.state.coordinateLocation!,
+                                  placeAddressName: _locationBloc
+                                      .state.placeSearchEntity!.placeAddress,
+                                ),
+                              );
+                            }
+                          : null,
+                  child: const Text("Ambil Foto"),
+                );
+              },
             ),
-            SizedBox(height: 16.h),
-            const Text("Lokasi Anda:"),
-            SizedBox(height: 4.h),
-            const BuildAddressLocation(),
-            SizedBox(height: 32.h),
-            MapContent(
-              mapController: mapController!,
-            ),
-          ],
+          ),
+        ),
+        body: Container(
+          padding: EdgeInsets.all(16.r),
+          child: Column(
+            children: [
+              BuildDateTimeHeader(
+                dateTimeNow: dateTimeNow,
+              ),
+              SizedBox(height: 16.h),
+              const Text("Lokasi Anda:"),
+              SizedBox(height: 4.h),
+              const BuildAddressLocation(),
+              SizedBox(height: 32.h),
+              MapContent(
+                mapController: mapController!,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -156,24 +221,19 @@ class BuildAddressLocation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return BlocBuilder<AttendanceSubmitLocationBloc,
-    //     AttendanceSubmitLocationState>(builder: (context, state) {
-    //   if (state.status == AttendanceSubmitLocationStatus.loaded) {
-    //     return Text(
-    //       state.placeSearchEntity!.placeAddress,
-    //       style: AppTextStyle.f11TextW400Spacing03,
-    //       textAlign: TextAlign.center,
-    //     );
-    //   }
-    //
-    //   return Skeleton(
-    //     width: DimensionConstant.pixel200.w,
-    //   );
-    // });
-    return Text(
-      "Jl. Mandor Naiman 13, RT01/RW02, Jakarta Selatan, DKI Jakarta",
-      textAlign: TextAlign.center,
-    );
+    return BlocBuilder<AttendanceSubmitLocationBloc,
+        AttendanceSubmitLocationState>(builder: (context, state) {
+      if (state.status == AttendanceSubmitLocationStatus.loaded) {
+        return Text(
+          state.placeSearchEntity!.placeAddress,
+          textAlign: TextAlign.center,
+        );
+      }
+
+      return Skeleton(
+        width: 200.w,
+      );
+    });
   }
 }
 
@@ -187,93 +247,47 @@ class MapContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return BlocBuilder<AttendanceSubmitLocationBloc,
-    //     AttendanceSubmitLocationState>(
-    //   builder: (context, state) {
-    //     if (state.status == AttendanceSubmitLocationStatus.loaded &&
-    //         state.coordinateLocation != null) {
-    //       return SizedBox(
-    //         width: DimensionConstant.pixelFullWidth,
-    //         height: 200.h,
-    //         child: ClipRRect(
-    //           borderRadius: BorderRadius.circular(8.r),
-    //           child: OSMFlutter(
-    //             controller: mapController,
-    //             trackMyPosition: false,
-    //             initZoom: 16,
-    //             minZoomLevel: 16,
-    //             maxZoomLevel: 16,
-    //             showZoomController: false,
-    //             onMapIsReady: (value) {
-    //               mapController.goToLocation(state.coordinateLocation!);
-    //
-    //               mapController.addMarker(
-    //                 state.coordinateLocation!,
-    //                 markerIcon: MarkerIcon(
-    //                   icon: Icon(
-    //                     Icons.location_pin,
-    //                     color: Colors.red,
-    //                     size: Platform.isAndroid ? 100 : null,
-    //                   ),
-    //                 ),
-    //               );
-    //
-    //               if (state.isRadiusOn()) {
-    //                 mapController.drawCircle(CircleOSM(
-    //                   key: "circleScopeAttendance",
-    //                   centerPoint: GeoPoint(
-    //                     longitude:
-    //                     state.radiusAttendanceEntity!.outletLongitude!,
-    //                     latitude: state.radiusAttendanceEntity!.outletLatitude!,
-    //                   ),
-    //                   radius:
-    //                   state.radiusAttendanceEntity!.outletRadius.toDouble(),
-    //                   color: AppColors.primary,
-    //                   strokeWidth: 0.3,
-    //                 ));
-    //               }
-    //             },
-    //           ),
-    //         ),
-    //       );
-    //     }
-    //
-    //     return Skeleton(
-    //       width: DimensionConstant.pixelFullWidth,
-    //       height: DimensionConstant.pixel200.h,
-    //     );
-    //   },
-    // );
+    return BlocBuilder<AttendanceSubmitLocationBloc,
+        AttendanceSubmitLocationState>(
+      builder: (context, state) {
+        if (state.status == AttendanceSubmitLocationStatus.loaded &&
+            state.coordinateLocation != null) {
+          return SizedBox(
+            width: 1.sw,
+            height: 200.h,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: OSMFlutter(
+                controller: mapController,
+                trackMyPosition: false,
+                initZoom: 16,
+                minZoomLevel: 16,
+                maxZoomLevel: 16,
+                showZoomController: false,
+                onMapIsReady: (value) {
+                  mapController.goToLocation(state.coordinateLocation!);
 
-    return SizedBox(
-      width: 1.sw,
-      height: 200.h,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8.r),
-        child: OSMFlutter(
-          controller: mapController,
-          trackMyPosition: false,
-          initZoom: 16,
-          minZoomLevel: 16,
-          maxZoomLevel: 16,
-          showZoomController: false,
-          onMapIsReady: (value) {
-            mapController.goToLocation(
-                GeoPoint(latitude: -7.8910283, longitude: 112.6679993));
-
-            mapController.addMarker(
-              GeoPoint(latitude: -7.8910283, longitude: 112.6679993),
-              markerIcon: MarkerIcon(
-                icon: Icon(
-                  Icons.location_pin,
-                  color: Colors.red,
-                  size: Platform.isAndroid ? 100 : null,
-                ),
+                  mapController.addMarker(
+                    state.coordinateLocation!,
+                    markerIcon: MarkerIcon(
+                      icon: Icon(
+                        Icons.location_pin,
+                        color: Colors.red,
+                        size: Platform.isAndroid ? 100 : null,
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-      ),
+            ),
+          );
+        }
+
+        return Skeleton(
+          width: 1.sw,
+          height: 200.h,
+        );
+      },
     );
   }
 }

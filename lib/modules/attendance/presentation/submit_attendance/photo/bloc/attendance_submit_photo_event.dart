@@ -3,8 +3,8 @@ part of 'attendance_submit_photo_bloc.dart';
 @freezed
 class AttendanceSubmitPhotoEvent with _$AttendanceSubmitPhotoEvent {
   const factory AttendanceSubmitPhotoEvent.initData({
-    GeoPoint? latLngAddress,
-    String? placeAddressName,
+    required GeoPoint latLngAddress,
+    required String placeAddressName,
     required bool isClockIn,
   }) = _InitData;
 

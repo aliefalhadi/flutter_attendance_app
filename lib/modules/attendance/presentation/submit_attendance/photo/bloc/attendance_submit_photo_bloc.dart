@@ -24,11 +24,11 @@ class AttendanceSubmitPhotoBloc
   }
 
   FutureOr<void> _onInitData(_InitData event, emit) async {
-    DateTime? dateTimeLocationNow = DateTime.now();
+    DateTime dateTimeNow = DateTime.now();
 
     emit(
       state.copyWith(
-        dateTimeNow: dateTimeLocationNow,
+        dateTimeNow: dateTimeNow,
         latLngAddress: event.latLngAddress,
         placeAddressName: event.placeAddressName,
         isClockIn: event.isClockIn,
