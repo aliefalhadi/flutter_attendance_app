@@ -1,4 +1,5 @@
 import 'package:attendance_app/modules/attendance/data/models/geo_coding_response_model.codegen.dart';
+import 'package:attendance_app/modules/attendance/domain/entities/post_attendance_params.codegen.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:injectable/injectable.dart';
@@ -26,6 +27,37 @@ class AttendanceRepositoryImpl extends AttendanceRepository {
     } on Exception catch (e, _) {
       return Left(AppError('Error $e'));
     } catch (e, _) {
+      return Left(AppError('Error $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppError, bool>> submitAttendance(
+      SubmitAttendanceParams params) async {
+    try {
+      final res = await _remoteDataSource.submitAttendance(params);
+
+      return Right(res);
+    } on Exception catch (e, _) {
+      return Left(AppError('Error $e'));
+    } catch (e, _) {
+      return Left(AppError('Error $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppError, String>> uploadImage(String imagePath) async {
+    try {
+      final res = await _remoteDataSource.uploadImage(imagePath);
+
+      return Right(res);
+    } on Exception catch (e, _) {
+      print("asdasddas");
+      print(e);
+      return Left(AppError('Error $e'));
+    } catch (e, _) {
+      print("asdasddas");
+      print(e);
       return Left(AppError('Error $e'));
     }
   }

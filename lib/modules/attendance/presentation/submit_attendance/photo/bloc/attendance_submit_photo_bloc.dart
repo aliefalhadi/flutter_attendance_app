@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:attendance_app/modules/attendance/domain/entities/post_attendance_params.codegen.dart';
+import 'package:attendance_app/modules/attendance/domain/usecases/upload_image_usecase.dart';
+import 'package:attendance_app/modules/login/domain/entity/user_entity.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +12,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image/image.dart' as img;
 import 'package:injectable/injectable.dart';
 
+import '../../../../domain/usecases/submit_attendance_usecase.dart';
+
 part 'attendance_submit_photo_bloc.freezed.dart';
 part 'attendance_submit_photo_event.dart';
 part 'attendance_submit_photo_state.dart';
@@ -16,10 +21,16 @@ part 'attendance_submit_photo_state.dart';
 @injectable
 class AttendanceSubmitPhotoBloc
     extends Bloc<AttendanceSubmitPhotoEvent, AttendanceSubmitPhotoState> {
-  AttendanceSubmitPhotoBloc() : super(const AttendanceSubmitPhotoState()) {
+  final UploadImageUseCase _uploadImageUseCase;
+  final SubmitAttendanceUseCase _submitAttendanceUseCase;
+
+  AttendanceSubmitPhotoBloc(
+    this._submitAttendanceUseCase,
+    this._uploadImageUseCase,
+  ) : super(const AttendanceSubmitPhotoState()) {
     on<_InitData>(_onInitData);
-    // on<_UploadImage>(_onUploadImage);
-    // on<_SubmitAttendance>(_onSubmitAttendance);
+    on<_UploadImage>(_onUploadImage);
+    on<_SubmitAttendance>(_onSubmitAttendance);
     on<_TakePhoto>(_onTakePhoto);
   }
 
@@ -32,6 +43,7 @@ class AttendanceSubmitPhotoBloc
         latLngAddress: event.latLngAddress,
         placeAddressName: event.placeAddressName,
         isClockIn: event.isClockIn,
+        userEntity: event.userEntity,
       ),
     );
   }
@@ -53,65 +65,59 @@ class AttendanceSubmitPhotoBloc
     }
   }
 
-  // FutureOr<void> _onUploadImage(_UploadImage event, emit) async {
-  //   emit(
-  //     state.copyWith(
-  //       status: AttendanceSubmitPhotoStatus.loading,
-  //     ),
-  //   );
+  FutureOr<void> _onUploadImage(_UploadImage event, emit) async {
+    emit(
+      state.copyWith(
+        status: AttendanceSubmitPhotoStatus.loading,
+      ),
+    );
+
+    final res = await _uploadImageUseCase(state.filePathPhoto);
+
+    res.fold(
+      (l) => emit(state.copyWith(status: AttendanceSubmitPhotoStatus.failure)),
+      (image) {
+        add(
+          _SubmitAttendance(urlImageUploaded: image),
+        );
+      },
+    );
+  }
+
   //
-  //   final res = await _uploadImageUseCase(state.filePathPhoto);
-  //
-  //   res.fold(
-  //     (l) => emit(state.copyWith(status: AttendanceSubmitPhotoStatus.failure)),
-  //     (data) {
-  //       add(
-  //         _SubmitAttendance(
-  //           urlImageUploaded: data.linkImageUpload,
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-  //
-  // FutureOr<void> _onSubmitAttendance(_SubmitAttendance event, emit) async {
-  //   DateTime? dateTimeLocationNow = await _dateTimeService.dateTimeLocationNow(
-  //     latitude: state.latLngAddress!.latitude,
-  //     longitude: state.latLngAddress!.longitude,
-  //   );
-  //
-  //   final res = await _submitAttendanceUseCase(PostAttendanceParams(
-  //     urlFaceLog: event.urlImageUploaded,
-  //     type: state.isClockIn! ? 'clockin' : 'clockout',
-  //     outletId: state.selectedOutlet!.outletId,
-  //     code: state.isClockIn!
-  //         ? dateTimeLocationNow.millisecondsSinceEpoch.toString()
-  //         : state.codeClockIn!,
-  //     userId: state.selectedOutlet!.userId,
-  //     loginTime: state.isClockIn!
-  //         ? dateTimeLocationNow.toFormatDateTimeParams()
-  //         : state.dateTimeClockIn!,
-  //     logoutTime: state.isClockIn!
-  //         ? null
-  //         : dateTimeLocationNow.toFormatDateTimeParams(),
-  //     deviceId: "0",
-  //     latitude: state.latLngAddress?.latitude ?? 0,
-  //     longitude: state.latLngAddress?.longitude ?? 0,
-  //     location: state.placeAddressName ?? '',
-  //   ));
-  //
-  //   res.fold(
-  //     (l) {
-  //       emit(state.copyWith(status: AttendanceSubmitPhotoStatus.failure));
-  //     },
-  //     (data) {
-  //       emit(state.copyWith(
-  //         status: AttendanceSubmitPhotoStatus.loaded,
-  //         dateTimeAttendance: dateTimeLocationNow,
-  //       ));
-  //     },
-  //   );
-  // }
+  FutureOr<void> _onSubmitAttendance(_SubmitAttendance event, emit) async {
+    DateTime? dateTimeLocationNow = DateTime.now();
+    final isLate = dateTimeLocationNow.isAfter(DateTime(
+        dateTimeLocationNow.year,
+        dateTimeLocationNow.month,
+        dateTimeLocationNow.day,
+        8,
+        0,
+        0));
+    final res = await _submitAttendanceUseCase(SubmitAttendanceParams(
+      urlFaceLog: event.urlImageUploaded,
+      type: state.isClockIn! ? 'clockin' : 'clockout',
+      companyId: state.userEntity!.companyId!,
+      userId: state.userEntity!.id!,
+      attendanceTime: dateTimeLocationNow.millisecondsSinceEpoch,
+      latitude: state.latLngAddress?.latitude ?? 0,
+      longitude: state.latLngAddress?.longitude ?? 0,
+      location: state.placeAddressName ?? '',
+      isLate: isLate ? 1 : 0,
+    ));
+
+    res.fold(
+      (l) {
+        emit(state.copyWith(status: AttendanceSubmitPhotoStatus.failure));
+      },
+      (data) {
+        emit(state.copyWith(
+          status: AttendanceSubmitPhotoStatus.loaded,
+          dateTimeAttendance: dateTimeLocationNow,
+        ));
+      },
+    );
+  }
 }
 
 Future<String?> takePicture(CameraController controller) async {

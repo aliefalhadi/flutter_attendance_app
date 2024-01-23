@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "797518695638",
+    "project_id": "attendane-app-224cf",
+    "storage_bucket": "attendane-app-224cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797518695638:android:45edf0f3bc5d8ae004cd77",
+        "android_client_info": {
+          "package_name": "com.example.attendance_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK_fiYdvokK2wQbePix3o8rGLjN2YuFwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

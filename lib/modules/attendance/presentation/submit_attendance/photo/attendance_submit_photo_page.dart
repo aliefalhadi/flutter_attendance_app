@@ -1,4 +1,6 @@
+import 'package:attendance_app/common/extentions/date_format.dart';
 import 'package:attendance_app/common/extentions/modal.dart';
+import 'package:attendance_app/modules/login/presentation/auth/bloc/auth_bloc.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../../common/auto_route/auto_route.gr.dart';
 import '../../../../../common/di_module/init_config.dart';
 import '../../../../../common/util/dialog_helper.dart';
 import 'bloc/attendance_submit_photo_bloc.dart';
@@ -88,6 +91,7 @@ class _AttendanceSubmitPhotoPageState extends State<AttendanceSubmitPhotoPage>
         latLngAddress: widget.latLngLocation,
         placeAddressName: widget.placeAddressName,
         isClockIn: widget.isClockIn,
+        userEntity: context.read<AuthBloc>().state.userEntity!,
       ),
     );
   }
@@ -128,23 +132,24 @@ class _AttendanceSubmitPhotoPageState extends State<AttendanceSubmitPhotoPage>
               if (state.status == AttendanceSubmitPhotoStatus.loading) {
                 DialogHelper.showLoadingDialog(context);
               } else if (state.status == AttendanceSubmitPhotoStatus.loaded) {
-                // AutoRouter.of(context).push(
-                //   AttendanceSubmitSuccessRoute(
-                //     dateTimeAttendance:
-                //         state.dateTimeAttendance!.toFormatDateTimeIndonesian(),
-                //     locationAttendance: state.placeAddressName,
-                //     isClockIn: state.isClockIn!,
-                //   ),
-                // );
+                Navigator.pop(context);
+                AutoRouter.of(context).push(
+                  AttendanceSubmitSuccessRoute(
+                    dateTimeAttendance:
+                        state.dateTimeAttendance!.toFormatDateTimeIndonesian(),
+                    locationAttendance: state.placeAddressName,
+                    isClockIn: state.isClockIn!,
+                  ),
+                );
               } else if (state.status == AttendanceSubmitPhotoStatus.failure) {
                 Navigator.pop(context);
-                // AutoRouter.of(context).push(
-                //   AttendanceSubmitErrorRoute(
-                //     title: "Gagal Melakukan Absen!",
-                //     subtitle:
-                //         "Pastikan perangkat terhubung ke jaringan\ninternet dan silakan ulangi kembali",
-                //   ),
-                // );
+                AutoRouter.of(context).push(
+                  AttendanceSubmitErrorRoute(
+                    title: "Gagal Melakukan Absen!",
+                    subtitle:
+                        "Pastikan perangkat terhubung ke jaringan\ninternet dan silakan ulangi kembali",
+                  ),
+                );
               }
             },
           ),

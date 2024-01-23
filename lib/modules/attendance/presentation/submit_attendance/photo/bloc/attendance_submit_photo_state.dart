@@ -7,11 +7,10 @@ enum AttendanceTakePhotoStatus { initial, loading, loaded, failure }
 @freezed
 class AttendanceSubmitPhotoState with _$AttendanceSubmitPhotoState {
   const factory AttendanceSubmitPhotoState({
+    UserEntity? userEntity,
     GeoPoint? latLngAddress,
     String? placeAddressName,
     bool? isClockIn,
-    String? dateTimeClockIn,
-    String? codeClockIn,
     DateTime? dateTimeNow,
     DateTime? dateTimeAttendance,
     @Default('') String filePathPhoto,

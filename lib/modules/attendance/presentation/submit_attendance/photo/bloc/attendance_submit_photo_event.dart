@@ -5,6 +5,7 @@ class AttendanceSubmitPhotoEvent with _$AttendanceSubmitPhotoEvent {
   const factory AttendanceSubmitPhotoEvent.initData({
     required GeoPoint latLngAddress,
     required String placeAddressName,
+    required UserEntity userEntity,
     required bool isClockIn,
   }) = _InitData;
 

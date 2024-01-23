@@ -61,26 +61,6 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const Divider(),
-                // Container(
-                //   padding:
-                //       EdgeInsets.symmetric(vertical: 56.h, horizontal: 16.w),
-                //   child: Column(
-                //     children: [
-                //       Text(
-                //         "Tidak ada rekap absen",
-                //         style: Theme.of(context)
-                //             .textTheme
-                //             .titleLarge!
-                //             .copyWith(fontWeight: FontWeight.w600),
-                //       ),
-                //       SizedBox(height: 8.h),
-                //       Text(
-                //           "Rekap absen Anda akan tampil disini ketika Anda sudah melakukan absen",
-                //           textAlign: TextAlign.center,
-                //           style: Theme.of(context).textTheme.titleSmall!),
-                //     ],
-                //   ),
-                // )
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 8.h),
                   child: Column(
