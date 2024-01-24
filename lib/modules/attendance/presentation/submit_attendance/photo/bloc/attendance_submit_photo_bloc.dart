@@ -87,13 +87,20 @@ class AttendanceSubmitPhotoBloc
   //
   FutureOr<void> _onSubmitAttendance(_SubmitAttendance event, emit) async {
     DateTime? dateTimeLocationNow = DateTime.now();
-    final isLate = dateTimeLocationNow.isAfter(DateTime(
-        dateTimeLocationNow.year,
-        dateTimeLocationNow.month,
-        dateTimeLocationNow.day,
-        8,
-        0,
-        0));
+    bool isLate = false;
+    if (state.isClockIn!) {
+      isLate = dateTimeLocationNow.isAfter(
+        DateTime(
+          dateTimeLocationNow.year,
+          dateTimeLocationNow.month,
+          dateTimeLocationNow.day,
+          8,
+          0,
+          0,
+        ),
+      );
+    }
+
     final res = await _submitAttendanceUseCase(SubmitAttendanceParams(
       urlFaceLog: event.urlImageUploaded,
       type: state.isClockIn! ? 'clockin' : 'clockout',
