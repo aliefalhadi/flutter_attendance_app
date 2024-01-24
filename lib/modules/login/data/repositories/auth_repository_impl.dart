@@ -49,4 +49,17 @@ class AuthRepositoryImpl extends AuthRepository {
       return Left(AppError('Error $e'));
     }
   }
+
+  @override
+  Future<Either<AppError, bool>> deleteUserLogin() async {
+    try {
+      final res = await _localDataSource.deleteUserLogin();
+
+      return Right(res);
+    } on Exception catch (e, _) {
+      return Left(AppError('Error $e'));
+    } catch (e, _) {
+      return Left(AppError('Error $e'));
+    }
+  }
 }

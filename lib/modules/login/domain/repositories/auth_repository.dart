@@ -7,4 +7,5 @@ import '../entity/login_entity.dart';
 abstract class AuthRepository {
   Future<Either<AppError, bool>> postLogin(LoginEntity loginEntity);
   Future<Either<AppError, UserEntity?>> getUserLogin();
+  Future<Either<AppError, bool>> deleteUserLogin();
 }

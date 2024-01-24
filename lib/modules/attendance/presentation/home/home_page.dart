@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../domain/entities/attendance_entity.codegen.dart';
+import 'sections/bottom_sheet_logout.dart';
 
 part 'sections/header.dart';
 part 'sections/history_attendance.dart';
@@ -40,42 +41,66 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => attendanceHomeBloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              return Text(state.userEntity!.name ?? '');
-            },
-          ),
-          actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.logout))
-          ],
-        ),
-        bottomSheet: Container(
-          padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
-          child: SizedBox(
-            width: 1.sw,
-            child: BlocBuilder<AttendanceHomeBloc, AttendanceHomeState>(
+      child: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (prev, next) {
+          return prev.userEntity != null && next.userEntity == null;
+        },
+        listener: (context, state) {
+          AutoRouter.of(context)
+              .pushAndPopUntil(const LoginRoute(), predicate: (route) => false);
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
-                return ElevatedButton(
-                  onPressed: state.status == AttendanceHomeStatus.loaded
-                      ? () {
-                          AutoRouter.of(context).push(
-                            LocationSubmitAttendanceRoute(
-                                isClockIn: state.isClockIn()),
-                          );
-                        }
-                      : null,
-                  child: Text(
-                    (state.isClockIn()) ? "Absen Masuk" : "Absen Keluar",
-                  ),
-                );
+                return Text(state.userEntity!.name ?? '');
               },
             ),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      isScrollControlled: true,
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(10.r),
+                        ),
+                      ),
+                      builder: (context) {
+                        return const BottomSheetLogout();
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.logout))
+            ],
           ),
-        ),
-        body: ListView(
-          children: const [_Header(), _HistoryAttendance()],
+          bottomSheet: Container(
+            padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
+            child: SizedBox(
+              width: 1.sw,
+              child: BlocBuilder<AttendanceHomeBloc, AttendanceHomeState>(
+                builder: (context, state) {
+                  return ElevatedButton(
+                    onPressed: state.status == AttendanceHomeStatus.loaded
+                        ? () {
+                            AutoRouter.of(context).push(
+                              LocationSubmitAttendanceRoute(
+                                  isClockIn: state.isClockIn()),
+                            );
+                          }
+                        : null,
+                    child: Text(
+                      (state.isClockIn()) ? "Absen Masuk" : "Absen Keluar",
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          body: ListView(
+            children: const [_Header(), _HistoryAttendance()],
+          ),
         ),
       ),
     );
