@@ -159,8 +159,9 @@ class _ListHistoryAttendance extends StatelessWidget {
                             .copyWith(fontWeight: FontWeight.w700),
                       ),
                       SizedBox(height: 4.h),
-                      Text(attendance.isLate == 1 ? "Late" : "On Time",
-                          style: Theme.of(context).textTheme.bodySmall),
+                      if (attendance.isTypeClockIn())
+                        Text(attendance.isLate == 1 ? "Late" : "On Time",
+                            style: Theme.of(context).textTheme.bodySmall),
                     ],
                   )
                 ],
