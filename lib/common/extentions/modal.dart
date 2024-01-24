@@ -11,7 +11,6 @@ extension BuildContextX on BuildContext {
       enableDrag: false,
       isDismissible: isDismissible,
       useRootNavigator: true,
-      routeSettings: const RouteSettings(name: 'modal-pin'),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
