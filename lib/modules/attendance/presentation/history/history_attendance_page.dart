@@ -2,11 +2,12 @@ import 'package:attendance_app/common/di_module/init_config.dart';
 import 'package:attendance_app/common/extentions/date_format.dart';
 import 'package:attendance_app/modules/attendance/presentation/history/bloc/history_attendance_bloc.dart';
 import 'package:attendance_app/modules/login/presentation/auth/bloc/auth_bloc.dart';
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../common/auto_route/auto_route.gr.dart';
 import '../../../../common/constants/app_colors.dart';
 import '../../../../common/widgets/skeleton.dart';
 import '../../domain/entities/attendance_entity.codegen.dart';

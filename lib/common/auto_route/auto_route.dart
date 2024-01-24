@@ -20,5 +20,6 @@ class AppRouter extends $AppRouter {
     AutoRoute(page: AttendanceSubmitSuccessRoute.page),
     AutoRoute(page: AttendanceSubmitErrorRoute.page),
     AutoRoute(page: HistoryAttendanceRoute.page),
+    AutoRoute(page: AttendanceDetailRoute.page),
   ];
 }

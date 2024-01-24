@@ -29,4 +29,8 @@ extension AttendanceEntityX on AttendanceEntity {
   DateTime toAttendanceTime() {
     return DateTime.fromMicrosecondsSinceEpoch(attendanceTime! * 1000);
   }
+
+  bool isTypeClockIn() {
+    return type == 'clockin';
+  }
 }
